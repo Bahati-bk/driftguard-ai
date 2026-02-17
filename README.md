@@ -52,6 +52,26 @@ driftguard-ai/
 └── README.md
 ```
 
+## Dataset
+
+This project uses the Credit Card Fraud Detection dataset.
+
+Download manually from:
+https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+
+OR use the automated script:
+
+1. Install Kaggle API:
+   pip install kaggle
+
+2. Add your Kaggle API credentials:
+   - Download kaggle.json from your Kaggle account
+   - Place it in:
+     C:\Users\YOUR_USERNAME\.kaggle\
+
+3. Run:
+   python scripts/download_data.py
+
 ## Quick Start
 
 ### 1. Clone Repository
