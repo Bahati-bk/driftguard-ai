@@ -46,6 +46,11 @@ class Transaction(BaseModel):
     V28: float
     Amount: float
 
+@app.get("/health")
+def health():
+    return {"status": "API is healthy"}
+
+
 @app.post("/predict")
 def predict(transaction: Transaction):
     import pandas as pd

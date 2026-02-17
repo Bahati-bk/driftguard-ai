@@ -4,6 +4,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from training.preprocess import load_data, preprocess, train_test_split_data
 from training.evaluate import evaluate_model
+import mlflow
+import mlflow.sklearn
+
 
 DATA_PATH = "data/raw/fraud_data.csv"
 MODEL_PATH = "models/model_v1.pkl"
@@ -45,6 +48,10 @@ def train():
     joblib.dump(best_model, MODEL_PATH)
     joblib.dump(scaler, SCALER_PATH)
     print(f"Best model saved to {MODEL_PATH}")
+    
+    with mlflow.start_run():
+        mlflow.sklearn.log_model(best_model, "fraud_model")
+
 
 if __name__ == "__main__":
     train()

@@ -2,4 +2,6 @@ kaggle
 pandas
 numpy
 scikit-learn
+mlflow
+joblib
 
