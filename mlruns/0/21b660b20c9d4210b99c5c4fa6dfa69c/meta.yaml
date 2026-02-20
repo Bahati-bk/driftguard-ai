@@ -1,0 +1,14 @@
+artifact_uri: file:///app/mlruns/0/21b660b20c9d4210b99c5c4fa6dfa69c/artifacts
+end_time: 1771575852318
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 21b660b20c9d4210b99c5c4fa6dfa69c
+run_name: gregarious-snipe-966
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771575812966
+status: 3
+tags: []
+user_id: root

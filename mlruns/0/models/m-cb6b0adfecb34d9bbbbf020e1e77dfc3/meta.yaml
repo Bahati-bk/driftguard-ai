@@ -1,0 +1,10 @@
+artifact_location: file:///app/mlruns/0/models/m-cb6b0adfecb34d9bbbbf020e1e77dfc3/artifacts
+creation_timestamp: 1771575814862
+experiment_id: '0'
+last_updated_timestamp: 1771575852122
+model_id: m-cb6b0adfecb34d9bbbbf020e1e77dfc3
+model_type: null
+name: fraud_model
+source_run_id: 21b660b20c9d4210b99c5c4fa6dfa69c
+status: 2
+status_message: null
