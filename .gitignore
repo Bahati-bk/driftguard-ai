@@ -1,3 +1,26 @@
-# Ignore datasets
-data/
-*.csv
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+.venv/
+.env/
+
+# Data & artifacts
+data/*.csv
+artifacts/
+models/*.pkl
+models/*.json
+
+# MLflow
+mlruns/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/

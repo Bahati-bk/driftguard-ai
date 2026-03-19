@@ -1,8 +1,10 @@
-kaggle
+fastapi
+uvicorn
 pandas
 numpy
+scipy
 scikit-learn
-mlflow
 joblib
-httpx
-
+streamlit
+requests
+python-multipart

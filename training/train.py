@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
+import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -33,8 +33,13 @@ def train():
     
     # Candidate models
     models = {
-        "LogisticRegression": LogisticRegression(max_iter=500, class_weight='balanced'),
-        "RandomForest": RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+        "LogisticRegression": LogisticRegression(max_iter=500, class_weight='balanced', C=0.1),
+        "RandomForest": RandomForestClassifier(
+            n_estimators=100, 
+            max_depth=10,
+            min_samples_leaf=4,
+            random_state=42, 
+            class_weight='balanced')
     }
     
     best_model = None
@@ -47,6 +52,11 @@ def train():
         if score > best_score:
             best_score = score
             best_model = model
+            
+    # Save baseline CSV for drift detection — unscaled raw values
+    baseline_df = df.drop(columns=["Class", "Time"])
+    baseline_df.to_csv("data/baseline.csv", index=False)
+    print("Saved baseline data to data/baseline.csv")
     
     # Save best model and scaler
     joblib.dump(best_model, MODEL_PATH)

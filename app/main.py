@@ -1,74 +1,111 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import joblib
-import numpy as np
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from app.drift import generate_drift_report
+from app.retrain import retrain_candidate_model, get_model_status, promote_candidate_model
+from app.storage import save_uploaded_file
 import os
 
-# Load model and scaler
-MODEL_PATH = "models/model_v1.pkl"
-SCALER_PATH = "models/scaler_v1.pkl"
-LOG_FILE = "data/processed/api_logs.csv"
+app = FastAPI(
+    title="DriftGuard AI",
+    version="1.0.0",
+    description="Model-agnostic drift monitoring and maintenance platform for deployed AI systems."
+)
 
-model = joblib.load(MODEL_PATH)
-scaler = joblib.load(SCALER_PATH)
+BASELINE_PATH = "data/baseline.csv"
+CURRENT_PATH = "data/current.csv"
 
-app = FastAPI(title="DriftGuard AI - Fraud Detection API")
 
-# Pydantic model for request
-class Transaction(BaseModel):
-    V1: float
-    V2: float
-    V3: float
-    V4: float
-    V5: float
-    V6: float
-    V7: float
-    V8: float
-    V9: float
-    V10: float
-    V11: float
-    V12: float
-    V13: float
-    V14: float
-    V15: float
-    V16: float
-    V17: float
-    V18: float
-    V19: float
-    V20: float
-    V21: float
-    V22: float
-    V23: float
-    V24: float
-    V25: float
-    V26: float
-    V27: float
-    V28: float
-    Amount: float
+@app.get("/")
+def home():
+    return {
+        "app": {
+            "name": "DriftGuard AI",
+            "version": "1.0.0",
+            "status": "running",
+            "tagline": "Monitor drift. Maintain trust."
+        },
+        "overview": {
+            "description": "DriftGuard AI monitors deployed machine learning systems by comparing baseline data with current production data, detecting drift, and supporting controlled model retraining."
+        },
+        "quick_start": [
+            {
+                "step": 1,
+                "action": "Upload baseline dataset",
+                "endpoint": "/upload-baseline",
+                "method": "POST"
+            },
+            {
+                "step": 2,
+                "action": "Upload current dataset",
+                "endpoint": "/upload-current",
+                "method": "POST"
+            },
+            {
+                "step": 3,
+                "action": "Run drift detection",
+                "endpoint": "/detect-drift",
+                "method": "GET"
+            },
+            {
+                "step": 4,
+                "action": "Retrain candidate model",
+                "endpoint": "/retrain",
+                "method": "POST"
+            },
+            {
+                "step": 5,
+                "action": "Promote candidate model",
+                "endpoint": "/promote-model",
+                "method": "POST"
+            },
+            {
+                "step": 6,
+                "action": "Check model status",
+                "endpoint": "/model-status",
+                "method": "GET"
+            }
+        ]
+    }
+
 
 @app.get("/health")
 def health():
-    return {"status": "API is healthy"}
+    return {
+        "status": "ok",
+        "service": "DriftGuard AI"
+    }
 
 
-@app.post("/predict")
-def predict(transaction: Transaction):
-    import pandas as pd
-    
-    df = pd.DataFrame([transaction.dict()])
-    
-    # Scale features
-    X_scaled = scaler.transform(df)
-    
-    proba = model.predict_proba(X_scaled)[0][1]
-    prediction = int(proba > 0.5)
-    
-    # Log features + prediction
-    df["is_fraud"] = prediction
-    df["fraud_probability"] = proba
-    if os.path.exists(LOG_FILE):
-        df.to_csv(LOG_FILE, mode='a', header=False, index=False)
-    else:
-        df.to_csv(LOG_FILE, index=False)
-    
-    return {"is_fraud": prediction, "fraud_probability": float(proba)}
+@app.post("/upload-baseline")
+def upload_baseline(file: UploadFile = File(...)):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Baseline file must be a CSV.")
+    save_uploaded_file(file, BASELINE_PATH)
+    return {"message": "Baseline dataset uploaded successfully.", "path": BASELINE_PATH}
+
+
+@app.post("/upload-current")
+def upload_current(file: UploadFile = File(...)):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Current file must be a CSV.")
+    save_uploaded_file(file, CURRENT_PATH)
+    return {"message": "Current dataset uploaded successfully.", "path": CURRENT_PATH}
+
+
+@app.get("/detect-drift")
+def detect_drift():
+    return generate_drift_report(BASELINE_PATH, CURRENT_PATH)
+
+
+@app.post("/retrain")
+def retrain(target_column: str = "target"):
+    return retrain_candidate_model(current_path=CURRENT_PATH, target_column=target_column)
+
+
+@app.post("/promote-model")
+def promote_model():
+    return promote_candidate_model()
+
+
+@app.get("/model-status")
+def model_status():
+    return get_model_status()

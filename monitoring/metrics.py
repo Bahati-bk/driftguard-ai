@@ -1,22 +1,29 @@
 import numpy as np
-import pandas as pd
 from scipy.stats import ks_2samp
 
+
 def psi(expected, actual, bins=10):
-    """Population Stability Index"""
-    def scale_values(arr, bins):
-        return pd.cut(arr, bins=bins, duplicates='drop')
-    
-    expected_counts = scale_values(expected, bins).value_counts(normalize=True)
-    actual_counts = scale_values(actual, bins).value_counts(normalize=True)
-    
-    df = pd.concat([expected_counts, actual_counts], axis=1).fillna(1e-6)
-    df.columns = ['expected', 'actual']
-    
-    psi_val = np.sum((df['expected'] - df['actual']) * np.log(df['expected'] / df['actual']))
-    return psi_val
+    expected = np.array(expected)
+    actual = np.array(actual)
+
+    if len(expected) == 0 or len(actual) == 0:
+        return 0.0
+
+    breakpoints = np.linspace(0, 100, bins + 1)
+    breakpoints = np.percentile(expected, breakpoints)
+    breakpoints = np.unique(breakpoints)
+
+    if len(breakpoints) < 2:
+        return 0.0
+
+    expected_counts = np.histogram(expected, bins=breakpoints)[0] / len(expected)
+    actual_counts = np.histogram(actual, bins=breakpoints)[0] / len(actual)
+
+    expected_counts = np.where(expected_counts == 0, 0.0001, expected_counts)
+    actual_counts = np.where(actual_counts == 0, 0.0001, actual_counts)
+
+    return np.sum((expected_counts - actual_counts) * np.log(expected_counts / actual_counts))
+
 
 def ks_test(expected, actual):
-    """Kolmogorov-Smirnov test for distribution difference"""
-    statistic, p_value = ks_2samp(expected, actual)
-    return statistic, p_value
+    return ks_2samp(expected, actual)
